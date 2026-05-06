@@ -1,17 +1,32 @@
 import streamlit as st
 import pandas as pd
-import pickle
+import joblib
 
-# Load trained model
-with open("shoes_sales_model.pkl", "rb") as f:
-    model = pickle.load(f)
+# ------------------------------------------------------------------
+# Load trained model (pipeline: preprocessor + linear regression)
+# ------------------------------------------------------------------
+model = joblib.load("shoes_sales_model.joblib")
 
-st.set_page_config(page_title="Footwear Sales Predictor", layout="centered")
+# ------------------------------------------------------------------
+# Page configuration
+# ------------------------------------------------------------------
+st.set_page_config(
+    page_title="Footwear Sales Demand Predictor",
+    layout="centered"
+)
 
+# ------------------------------------------------------------------
+# App title and description
+# ------------------------------------------------------------------
 st.title("👟 Footwear Sales Demand Predictor")
-st.markdown("Predict expected units sold based on product and market inputs.")
+st.write(
+    "This application predicts the expected number of units sold "
+    "based on product characteristics, pricing, and market inputs."
+)
 
-# User inputs
+# ------------------------------------------------------------------
+# User input widgets
+# ------------------------------------------------------------------
 brand = st.selectbox(
     "Brand",
     ["Adidas", "Nike", "Puma", "Reebok", "New Balance", "Skechers"]
@@ -37,19 +52,28 @@ sales_channel = st.selectbox(
     ["Online", "Mall", "Retail Store"]
 )
 
-quarter = st.selectbox("Quarter", [1, 2, 3, 4])
+quarter = st.selectbox(
+    "Quarter",
+    [1, 2, 3, 4]
+)
 
-# Create input dataframe
-input_df = pd.DataFrame({
-    "Brand": [brand],
-    "Shoe_Type": [shoe_type],
-    "Price_Band": [price_band],
-    "Country": [country],
-    "Sales_Channel": [sales_channel],
-    "Quarter": [quarter]
-})
+# ------------------------------------------------------------------
+# Create input DataFrame (must match training features)
+# ------------------------------------------------------------------
+input_df = pd.DataFrame(
+    {
+        "Brand": [brand],
+        "Shoe_Type": [shoe_type],
+        "Price_Band": [price_band],
+        "Country": [country],
+        "Sales_Channel": [sales_channel],
+        "Quarter": [quarter],
+    }
+)
 
-# Predict button
+# ------------------------------------------------------------------
+# Prediction
+# ------------------------------------------------------------------
 if st.button("Predict Units Sold"):
     prediction = model.predict(input_df)[0]
     st.success(f"✅ Predicted Units Sold: {prediction:.2f}")
